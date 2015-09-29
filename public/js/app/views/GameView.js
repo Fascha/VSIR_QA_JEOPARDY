@@ -64,7 +64,7 @@ Jeopardy.GameView = (function(){
       },
       _onGameInitialized = function(ev, data){;
         questions = data;
-        console.log(questions);
+
         _showCategories();
         _arrangeHeadlines();
         _setValues();
