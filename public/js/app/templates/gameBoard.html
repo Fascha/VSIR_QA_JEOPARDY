@@ -157,7 +157,9 @@ $(function() {
 		</div>
 
         <div class="text-center">
-            <h2 id="points">Money: $0</h2>
+            <h2 id="pointsPlayerOne" style="display: inline">Player 1: $0</h2>
+            <h2 id="pointsPlayerTwo" style="display: inline; margin-left: 20px;">Player 2: $0</h2>
+            <h2 id="pointsPlayerThree" style="display: inline; margin-left: 20px;">Player 3: $0</h2>
         </div>
     
     <div id="gameBoard" class="col-lg-12">
@@ -217,9 +219,10 @@ $(function() {
     </div>
 
         <div class="text-center">
-            <img id="buttonNewGame" style="cursor:pointer" src="../../../images/button_newGame.png">
+            <img id="buttonSinglePlayer" style="cursor:pointer" src="../../../images/button_singleplayer.png">
+            <img id="buttonMultiPlayer" style="cursor:pointer" src="../../../images/button_multiplayer.png">
         </div>
-        
+
 		<div class="footer">
 			<div class="copy-rights text-center">
 				<p> Copyright &copy;2015  All rights  Reserved | Created by Fabian Schatz</p>
@@ -227,29 +230,8 @@ $(function() {
 		</div>
 	</div>
 
-    <!-- Modal -->
-    <div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
-                    <h3 class="modal-title" id="myModalLabel"></h3>
-                </div>
-                <div class="modal-body">
-                    <h4 id="question"></h4>
-                    <input class="input-lg" type="text" id="answer" placeholder="Who/What is...">
-                    <div id="error" class="hide ui-state-error-text">The answer must not be empty</div>
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button type="button" name="answer_submit" class="btn btn-primary">Answer</button>
-                    <button type="button" name="restart_game" class="btn btn-primary hide">New Game</button>
-                </div>
-            </div>
-        </div>
-    </div>
+<div id="modalContainer"></div>
 </body>
-
 <script src="../Controller/Jeopardy.js"></script>
 <script src="../models/Session.js"></script>
 <script src="../views/GameView.js"></script>

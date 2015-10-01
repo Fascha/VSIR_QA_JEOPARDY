@@ -7,5 +7,8 @@ var Jeopardy = {
   },
   initGameView: function(){
     this.GameView.init(this.Session);
+  },
+  initTagCloudView: function(type){
+    this.TagCloud.init(this.Session, type);
   }
 };

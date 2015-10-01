@@ -9,52 +9,102 @@ Jeopardy.GameView = (function(){
       $myModal = undefined,
       $myModalLabel = undefined,
       $myModalQuestion = undefined,
-      $myModalAnswer = undefined,
+      $myModalAnswerInput = undefined,
       currentQuestion = undefined,
       currentTarget = undefined,
-      $buttonNewGame = undefined,
-      gamePoints = 0,
+      $singlePlayer = undefined,
+      isMultiplayer = false,
+      $btnWrongAnswer = undefined,
+      $btnRightAnswer = undefined,
+      $btnAnswerSubmit = undefined,
+      $btnCloseQuestion = undefined,
+      $myModalAnswer = undefined,
+      playerOne = 0,
+      playerTwo = 0,
+      playerThree = 0,
       answeredQuestions = 0,
       $points = undefined,
       $error = undefined,
       $categories = undefined,
+      $multiPlayer = undefined,
+      $personRadioGroup = undefined,
+      $playerOne = undefined,
+      $playerTwo = undefined,
+      $playerThree = undefined,
+      $modalContainer = undefined,
+      $myModalQuestionContainer = undefined,
+      $myModalAnswerContainer = undefined,
+      $myModalGameOverMessage = undefined,
       init = function(Session){
-        $buttonNewGame = $('#buttonNewGame');
+        $modalContainer = $('#modalContainer');
+        _initQuestionModal();
+        $playerOne = $('#pointsPlayerOne');
+        $playerTwo = $('#pointsPlayerTwo');
+        $playerThree = $('#pointsPlayerThree');
+        $multiPlayer = $('#buttonMultiPlayer');
+        $singlePlayer = $('#buttonSinglePlayer');
         $points = $('#points');
         $body = $('body');
-        $error = $('#error');
         SessionModel = Session;
         SessionModel.init();
         SessionModel.startNewGame();
-        $myModal = $('#myModal');
-        $myModalLabel = $('#myModalLabel');
-        $myModalQuestion = $('#question');
-        $myModalAnswer = $('#answer');
         $categories = $('#categories');
 
         $(window).resize(_arrangeHeadlines);
 
-        $myModal.on('show.bs.modal', function () {
-          $myModalAnswer.focus();
-        });
-
         _resetGameBoard();
 
-        $buttonNewGame.click(_onNewGame);
+        $singlePlayer.click({isMultiplayer : false}, _onNewGame);
+        $multiPlayer.click({isMultiplayer : true}, _onNewGame);
 
         $body.on('game_initialized', _onGameInitialized);
 
-        $('button[name="answer_submit"]').click(_onAnswerSubmit);
-        $('button[name="restart_game"]').click(_onNewGame);
         $('input[type="image"]').click(_onFieldClicked);
       },
-      _onNewGame = function(){
-        $('button[name="answer_submit"]').removeClass('hide');
-        $('button[name="restart_game"]').addClass('hide');
-        $myModal.modal('hide');
+      _onModalLoaded = function(){
+        $myModalGameOverMessage = $('#gameOverMessage');
+        $error = $('#error');
+        $myModal = $('#myModal');
+        $myModalLabel = $('#myModalLabel');
+        $myModalQuestion = $('#question');
+        $myModalQuestionContainer = $("#questionContainer");
+        $myModalAnswerContainer = $("#answerContainer");
+        $myModalAnswerInput = $('#answerInput');
+        $myModalAnswer = $('#answer');
+        $personRadioGroup = $('#personRadioGroup');
+        $btnCloseQuestion = $('button[name="close_question"]');
+        $btnAnswerSubmit = $('button[name="answer_submit"]');
+        $btnWrongAnswer = $('button[name="wrong_answer"]');
+        $btnRightAnswer = $('button[name="right_answer"]');
+
+        $btnAnswerSubmit.click(_onAnswerSubmit);
+
+        $btnRightAnswer.click(_onAnswerRight);
+        $btnWrongAnswer.click(_onAnswerWrong);
+
+        $('button[name="restart_game"]').click({isMultiplayer: isMultiplayer}, function(ev){
+          setTimeout(function(){_onNewGame(ev);}, 500);
+        });
+      },
+      _initQuestionModal = function(){
+          if(isMultiplayer){
+            $modalContainer.load('../templates/multiplayerModal.html', _onModalLoaded);
+          }else{
+            $modalContainer.load('../templates/singleplayerModal.html', _onModalLoaded);
+          }
+      },
+      _onNewGame = function(ev){
+        if(ev.data.isMultiplayer){
+          isMultiplayer = true;
+        }else{
+          isMultiplayer = false;
+        }
+
+        _initQuestionModal();
+
         questions = undefined;
 
-        gamePoints = 0;
+        playerOne = 0;
         answeredQuestions = 0;
 
         _resetGameBoard();
@@ -64,6 +114,14 @@ Jeopardy.GameView = (function(){
       },
       _onGameInitialized = function(ev, data){;
         questions = data;
+
+        if(isMultiplayer){
+          $multiPlayer.attr('src', '../../../images/multiPlayerSelected.jpg');
+          $singlePlayer.attr('src', '../../../images/button_singleplayer.png');
+        }else{
+          $singlePlayer.attr('src', '../../../images/singlePlayerSelected.jpg');
+          $multiPlayer.attr('src', '../../../images/button_multiplayer.png');
+        }
 
         _showCategories();
         _arrangeHeadlines();
@@ -138,7 +196,11 @@ Jeopardy.GameView = (function(){
         currentTarget = field;
         currentQuestion = question;
 
-        _showQuestion(question)
+        _showQuestion(question);
+        _showAnswer(question.answer);
+      },
+      _showAnswer = function(answer){
+        $myModalAnswer.html(answer);
       },
       _showQuestion = function(question){
         var headline = 'Category: ' + question.category + '   Value: ' + question.value;
@@ -147,48 +209,115 @@ Jeopardy.GameView = (function(){
         $myModal.modal('show');
       },
       _onAnswerSubmit = function(){
-        var answer = $myModalAnswer.val();
+        var answer = $myModalAnswerInput.val();
         if(answer.trim()) {
           $error.addClass('hide');
           if (answer.toLowerCase() === currentQuestion.answer.toLowerCase()) {
-            _increasePoints(currentQuestion.value);
-            $points.html('Money: $' + gamePoints);
-          }
-          $myModalAnswer.val("");
-          currentTarget.prop('disabled', true);
-          currentTarget.addClass('overlay');
-          answeredQuestions++;
-          if(answeredQuestions >= 25){
-            answeredQuestions = 0;
-            $('button[name="answer_submit"]').addClass('hide');
-            $('button[name="restart_game"]').removeClass('hide');
-            $myModalAnswer.addClass('hide');
-            $myModalLabel.html('GAME OVER');
-            $myModalQuestion.html('Congratulations! You won: $' + gamePoints);
+            _increasePoints(currentQuestion.value, playerOne);
           }else{
-            $myModal.modal('hide');
+            _decreasePoints(currentQuestion.value, playerOne);
           }
+          $myModalAnswerInput.val("");
+          _onAnswered();
         }else{
           $error.removeClass('hide');
         }
       },
-      _increasePoints = function(value){
-        switch (value){
-          case '$200':
-            gamePoints += 200;
-            break;
-          case '$400':
-            gamePoints += 400;
-            break;
-          case '$500':
-            gamePoints += 600;
-            break;
-          case '$600':
-            gamePoints += 800;
-            break;
-          case '$1000':
-            gamePoints += 1000;
-            break;
+      _getCurrentPlayer = function(){
+        return $personRadioGroup.find('.active').find('input').val();
+      },
+      _updatePlayerScores = function(){
+        $playerOne.html('Player 1: $' + playerOne);
+        $playerTwo.html('Player 2: $' + playerTwo);
+        $playerThree.html('Player 3: $' + playerThree);
+      },
+      _onAnswerRight = function(){
+        var currentPlayer = _getCurrentPlayer();
+        _increasePoints(currentQuestion.value, currentPlayer);
+        _onAnswered();
+      },
+      _onAnswerWrong = function(){
+        var currentPlayer = _getCurrentPlayer();
+        _decreasePoints(currentQuestion.value, currentPlayer);
+        _onAnswered();
+      },
+      _onAnswered = function(){
+        _updatePlayerScores();
+        currentTarget.prop('disabled', true);
+        currentTarget.addClass('overlay');
+        answeredQuestions++;
+        if(answeredQuestions >= 2){
+          answeredQuestions = 0;
+          $('button[name="answer_submit"]').addClass('hide');
+          $('button[name="restart_game"]').removeClass('hide');
+
+          if(isMultiplayer){
+            $btnRightAnswer.addClass('hide');
+            $btnWrongAnswer.addClass('hide');
+          }else {
+            $myModalAnswerInput.addClass('hide');
+          }
+
+          $myModalQuestionContainer.addClass('hide');
+          $myModalAnswerContainer.addClass('hide');
+
+          $myModalLabel.html('GAME OVER');
+         _setGameOverMessage();
+        }else{
+          $myModal.modal('hide');
+        }
+      },
+      _setGameOverMessage = function(){
+        if(isMultiplayer){
+          var list = _getPlayerList();
+          $myModalGameOverMessage.html('1. Player' + list[2].player + ': $' + list[2].score + '<br>' + '2. Player' + list[1].player + ': $' + list[1].score + '<br>' + '3. Player' + list[0].player + ': $' + list[0].score);
+        }else{
+          $myModalGameOverMessage.html('You won: $' + playerOne);
+        }
+        $myModalGameOverMessage.removeClass('hide');
+      },
+      _getPlayerList = function(){
+        var list = [];
+        list.push({player: 1, "score": playerOne});
+        list.push({player: 2, "score": playerTwo});
+        list.push({player: 3, "score": playerThree});
+
+        return _(list).sortBy(function(obj){
+          return obj.score;
+        });
+      },
+      _decreasePoints = function(value, player){
+        if(player === "1"){
+          playerOne -= SessionModel.stringToNumber(value);
+
+          if(playerOne < 0){
+            playerOne = 0;
+          }
+        }
+        if(player === "2"){
+          playerTwo -= SessionModel.stringToNumber(value);
+
+          if(playerTwo < 0){
+            playerTwo = 0;
+          }
+        }
+        if(player === "3"){
+          playerThree -= SessionModel.stringToNumber(value);
+
+          if(playerThree < 0){
+            playerThree = 0;
+          }
+        }
+      },
+      _increasePoints = function(value, player){
+        if(player === "1"){
+          playerOne += SessionModel.stringToNumber(value);
+        }
+        if(player === "2"){
+          playerTwo += SessionModel.stringToNumber(value);
+        }
+        if(player === "3"){
+          playerThree += SessionModel.stringToNumber(value);
         }
       },
       _arrangeHeadlines = function(){

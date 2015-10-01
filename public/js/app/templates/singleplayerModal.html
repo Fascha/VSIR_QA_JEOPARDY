@@ -1,0 +1,26 @@
+<!-- SinglePlayer Modal -->
+<div class="modal fade" id="myModal" tabindex="-1" role="dialog" aria-labelledby="myModalLabel">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+                <h3 class="modal-title" id="myModalLabel"></h3>
+            </div>
+            <div class="modal-body">
+                <span id="questionContainer"><h2>Question: </h2><h3 id="question"></h3></span>
+                <br>
+                <br>
+                <input class="input-lg" type="text" id="answerInput" placeholder="Who/What is...">
+                <div id="error" class="hide ui-state-error-text">The answer must not be empty</div>
+                <h2 id="gameOverMessage" class="hide"></h2>
+            </div>
+            <div class="modal-footer">
+                <div style="float: right">
+                    <button type="button" class="btn btn-default" name="close_question" data-dismiss="modal">Close</button>
+                    <button type="button" name="answer_submit" class="btn btn-primary">Answer</button>
+                    <button type="button" name="restart_game" data-dismiss="modal" class="btn btn-primary hide">New Game</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

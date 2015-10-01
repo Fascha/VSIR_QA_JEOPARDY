@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<link href="../../../css/bootstrap.css" rel='stylesheet' type='text/css' />
+<!-- Custom Theme files -->
+<link href="../../../css/style.css" rel="stylesheet" type="text/css" media="all" />
+<!-- Custom Theme files -->
+<script src="../../libs/jquery.min.js"></script>
+<script src="../../libs/underscore-min.js"></script>
+<script src="../../libs/wordcloud2.js"></script>
+<script src="../../libs/tagcanvas.js"></script>
+<body>
+    <canvas id="tagCanvas" style="width: 100%; height: 100%; position: fixed; top: 0; left: 0; right: 0;"></canvas>
+
+    <div id="tags" class="hide">
+        <ul></ul>
+    </div>
+</body>
+<script src="../Controller/Jeopardy.js"></script>
+<script src="../models/Session.js"></script>
+<script src="../views/TagCloudView.js"></script>
+<script>
+    Jeopardy.initTagCloudView('question');
+</script>
+</html>
