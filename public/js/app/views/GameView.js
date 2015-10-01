@@ -35,6 +35,7 @@ Jeopardy.GameView = (function(){
       $myModalQuestionContainer = undefined,
       $myModalAnswerContainer = undefined,
       $myModalGameOverMessage = undefined,
+      $myModalSkip = undefined,
       init = function(Session){
         $modalContainer = $('#modalContainer');
         _initQuestionModal();
@@ -76,15 +77,28 @@ Jeopardy.GameView = (function(){
         $btnAnswerSubmit = $('button[name="answer_submit"]');
         $btnWrongAnswer = $('button[name="wrong_answer"]');
         $btnRightAnswer = $('button[name="right_answer"]');
+        $myModalSkip = $('button[name="skip"]');
 
         $btnAnswerSubmit.click(_onAnswerSubmit);
 
         $btnRightAnswer.click(_onAnswerRight);
         $btnWrongAnswer.click(_onAnswerWrong);
 
+        $myModalSkip.click(_skipQuestion);
+
         $('button[name="restart_game"]').click({isMultiplayer: isMultiplayer}, function(ev){
           setTimeout(function(){_onNewGame(ev);}, 500);
         });
+      },
+      _disableField = function(){
+        currentTarget.prop('disabled', true);
+        currentTarget.addClass('overlay');
+      },
+      _skipQuestion = function(){
+        answeredQuestions++;
+
+        _disableField();
+        _checkForGameEnd();
       },
       _initQuestionModal = function(){
           if(isMultiplayer){
@@ -96,8 +110,14 @@ Jeopardy.GameView = (function(){
       _onNewGame = function(ev){
         if(ev.data.isMultiplayer){
           isMultiplayer = true;
+
+          $playerThree.removeClass('hide');
+          $playerTwo.removeClass('hide');
         }else{
           isMultiplayer = false;
+
+          $playerThree.addClass('hide');
+          $playerTwo.addClass('hide');
         }
 
         _initQuestionModal();
@@ -105,7 +125,11 @@ Jeopardy.GameView = (function(){
         questions = undefined;
 
         playerOne = 0;
+        playerTwo = 0;
+        playerThree = 0;
         answeredQuestions = 0;
+
+        _updatePlayerScores();
 
         _resetGameBoard();
 
@@ -185,6 +209,8 @@ Jeopardy.GameView = (function(){
             return '../../../images/button_900.jpg';
           case '$1000':
             return '../../../images/button_1000.png';
+          case '$1,000':
+            return '../../../images/button_1000.png';
         }
       },
       _onFieldClicked = function(ev){
@@ -242,11 +268,13 @@ Jeopardy.GameView = (function(){
         _onAnswered();
       },
       _onAnswered = function(){
-        _updatePlayerScores();
-        currentTarget.prop('disabled', true);
-        currentTarget.addClass('overlay');
         answeredQuestions++;
-        if(answeredQuestions >= 2){
+        _updatePlayerScores();
+        _disableField();
+        _checkForGameEnd();
+      },
+      _checkForGameEnd = function(){
+        if(answeredQuestions >= 25){
           answeredQuestions = 0;
           $('button[name="answer_submit"]').addClass('hide');
           $('button[name="restart_game"]').removeClass('hide');
@@ -254,6 +282,7 @@ Jeopardy.GameView = (function(){
           if(isMultiplayer){
             $btnRightAnswer.addClass('hide');
             $btnWrongAnswer.addClass('hide');
+            $myModalSkip.addClass('hide');
           }else {
             $myModalAnswerInput.addClass('hide');
           }
@@ -262,7 +291,7 @@ Jeopardy.GameView = (function(){
           $myModalAnswerContainer.addClass('hide');
 
           $myModalLabel.html('GAME OVER');
-         _setGameOverMessage();
+          _setGameOverMessage();
         }else{
           $myModal.modal('hide');
         }

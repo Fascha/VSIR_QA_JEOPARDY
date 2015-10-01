@@ -49,6 +49,19 @@
             <filter class="solr.LowerCaseFilterFactory"/>
           </analyzer>
         </fieldType>
+
+        <fieldType name="text_general_stopword_filtered" class="solr.TextField" positionIncrementGap="100">
+            <analyzer type="index">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
+            </analyzer>
+            <analyzer type="query">
+                <tokenizer class="solr.StandardTokenizerFactory"/>
+                <filter class="solr.LowerCaseFilterFactory"/>
+                <filter class="solr.StopFilterFactory" words="lang/stopwords_en.txt" ignoreCase="true"/>
+            </analyzer>
+        </fieldType>
     </types>
 
     <field name="_version_" type="long" indexed="true" stored="true"/>
@@ -56,12 +69,18 @@
     <field name="_root_" type="string" indexed="true" stored="false"/>
 
     <field name="category" type="string" indexed="true" stored="true" multiValued="false"/>
-    <field name="air_date" type="string"/>
+    <field name="air_date" type="string" indexed="false" stored="true"/>
     <field name="question" type="text_general" indexed="true" stored="true" multiValued="true"/>
     <field name="value" type="string" indexed="true" stored="true" multiValued="false"/>
-    <field name="answer" type="text_general"/>
-    <field name="round" type="string"/>
-    <field name="show_number" type="int"/>
+    <field name="answer" type="text_general" indexed="true" stored="true" multiValued="false"/>
+    <field name="round" type="string" indexed="false" stored="true"/>
+    <field name="show_number" type="int" indexed="false" stored="true"/>
+
+    <field name="question_stopword_filtered" type="text_general_stopword_filtered" multiValued="true" indexed="true" stored="true"/>
+    <field name="answer_stopword_filtered" type="text_general_stopword_filtered" multiValued="true" indexed="true" stored="true"/>
+
+    <copyField source="question" dest="question_stopword_filtered"/>
+    <copyField source="answer" dest="answer_stopword_filtered"/>
 
     <dynamicField name="random_*" type="random"/>
 </schema>

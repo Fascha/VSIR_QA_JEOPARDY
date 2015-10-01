@@ -14,7 +14,7 @@ Jeopardy.Session = (function(){
       GROUP_FIELD = '&group.field=category',
       CATEGORY = 'category:',
       ROUND_JEOPARDY = 'round:Jeopardy!',
-      QUERY_QUESTION = 'q=question:*',
+      QUERY_QUESTION = 'q=question:',
       GAME_CATEGORY_QUERY = 'q=' + CATEGORY + '*',
       GAME_CATEGORY_NUMBER = 5,
       GAME_QUESTION_NUMBER = 100000,
